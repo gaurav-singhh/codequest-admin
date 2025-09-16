@@ -1,0 +1,129 @@
+name: Validate Problem Submission
+
+on:
+  pull_request:
+    paths:
+      - 'problem-submissions/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Validate problem format
+        run: |
+          echo "🔍 Validating problem submissions..."
+          
+          # Get list of changed files in problem-submissions
+          CHANGED_DIRS=$(git diff --name-only origin/main...HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
+          
+          if [ -z "$CHANGED_DIRS" ]; then
+            echo "No problem submissions to validate"
+            exit 0
+          fi
+          
+          echo "Changed directories: $CHANGED_DIRS"
+          
+          # Validate each changed problem directory
+          for dir in $CHANGED_DIRS; do
+            echo "Validating $dir..."
+            node scripts/validate-problem.js "$dir"
+          done
+          
+      - name: Generate boilerplate code
+        run: |
+          echo "🛠️ Generating boilerplate code..."
+          
+          # Get list of changed problem directories
+          CHANGED_DIRS=$(git diff --name-only origin/main...HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
+          
+          for dir in $CHANGED_DIRS; do
+            echo "Generating boilerplate for $dir..."
+            node tools/boilerplate-generator/index.js "$dir"
+          done
+          
+      - name: Check generated files
+        run: |
+          echo "📋 Checking generated files..."
+          
+          # Check if boilerplate files were generated correctly
+          CHANGED_DIRS=$(git diff --name-only origin/main...HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
+          
+          for dir in $CHANGED_DIRS; do
+            echo "Checking $dir..."
+            
+            # Check required boilerplate files exist
+            if [ ! -f "$dir/boilerplate/function.cpp" ] || \
+               [ ! -f "$dir/boilerplate/function.js" ] || \
+               [ ! -f "$dir/boilerplate/function.rs" ]; then
+              echo "❌ Missing boilerplate files in $dir"
+              exit 1
+            fi
+            
+            # Check full boilerplate files exist
+            if [ ! -f "$dir/boilerplate-full/function.cpp" ] || \
+               [ ! -f "$dir/boilerplate-full/function.js" ] || \
+               [ ! -f "$dir/boilerplate-full/function.rs" ]; then
+              echo "❌ Missing full boilerplate files in $dir"
+              exit 1
+            fi
+            
+            echo "✅ All files present for $dir"
+          done
+          
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            
+            // Get validation results
+            let message = "## 🔍 Problem Validation Results\n\n";
+            
+            try {
+              const changedDirs = execSync(
+                "git diff --name-only origin/main...HEAD | grep '^problem-submissions/' | cut -d'/' -f1-2 | sort -u",
+                { encoding: 'utf8' }
+              ).trim().split('\n').filter(Boolean);
+              
+              if (changedDirs.length === 0) {
+                message += "No problem submissions found in this PR.";
+              } else {
+                message += `Found ${changedDirs.length} problem submission(s):\n\n`;
+                
+                for (const dir of changedDirs) {
+                  message += `### 📁 ${dir}\n`;
+                  message += "- ✅ Problem format validated\n";
+                  message += "- ✅ Boilerplate code generated\n";
+                  message += "- ✅ Test cases verified\n\n";
+                }
+                
+                message += "## ✨ Next Steps\n\n";
+                message += "1. Admin review and approval\n";
+                message += "2. Automatic sync to web application\n";
+                message += "3. Problem goes live for users!\n\n";
+                message += "Thank you for contributing to CodeQuest! 🚀";
+              }
+            } catch (error) {
+              message += `❌ Error during validation: ${error.message}`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });

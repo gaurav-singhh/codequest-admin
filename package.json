@@ -1,0 +1,30 @@
+{
+  "name": "codequest-admin",
+  "version": "1.0.0",
+  "description": "Problem Management System for CodeQuest - Handles community problem submissions and automated processing",
+  "main": "index.js",
+  "scripts": {
+    "validate": "node scripts/validate-problem.js",
+    "generate": "node tools/boilerplate-generator/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "competitive-programming",
+    "problem-management",
+    "automation",
+    "github-actions"
+  ],
+  "author": "CodeQuest Admin",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "yaml": "^2.3.4",
+    "joi": "^17.11.0",
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.1"
+  }
+}
