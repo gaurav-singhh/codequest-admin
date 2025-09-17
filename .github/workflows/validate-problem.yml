@@ -3,64 +3,64 @@ name: Validate Problem Submission
 on:
   pull_request:
     paths:
-      - 'problem-submissions/**'
+      - "problem-submissions/**"
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'npm'
-          
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm install
-        
+
       - name: Validate problem format
         run: |
           echo "🔍 Validating problem submissions..."
-          
+
           # Get list of changed files in problem-submissions
           CHANGED_DIRS=$(git diff --name-only origin/main...HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
-          
+
           if [ -z "$CHANGED_DIRS" ]; then
             echo "No problem submissions to validate"
             exit 0
           fi
-          
+
           echo "Changed directories: $CHANGED_DIRS"
-          
+
           # Validate each changed problem directory
           for dir in $CHANGED_DIRS; do
             echo "Validating $dir..."
             node scripts/validate-problem.js "$dir"
           done
-          
+
       - name: Generate boilerplate code
         run: |
           echo "🛠️ Generating boilerplate code..."
-          
+
           # Get list of changed problem directories
           CHANGED_DIRS=$(git diff --name-only origin/main...HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
-          
+
           for dir in $CHANGED_DIRS; do
             echo "Generating boilerplate for $dir..."
             node tools/boilerplate-generator/index.js "$dir"
           done
-          
+
       - name: Check generated files
         run: |
           echo "📋 Checking generated files..."
-          
+
           # Check if boilerplate files were generated correctly
           CHANGED_DIRS=$(git diff --name-only origin/main...HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
-          
+
           for dir in $CHANGED_DIRS; do
             echo "Checking $dir..."
             
@@ -82,17 +82,17 @@ jobs:
             
             echo "✅ All files present for $dir"
           done
-          
+
       - name: Comment on PR
         uses: actions/github-script@v6
         if: always()
         with:
           script: |
             const { execSync } = require('child_process');
-            
+
             // Get validation results
             let message = "## 🔍 Problem Validation Results\n\n";
-            
+
             try {
               const changedDirs = execSync(
                 "git diff --name-only origin/main...HEAD | grep '^problem-submissions/' | cut -d'/' -f1-2 | sort -u",
@@ -120,7 +120,7 @@ jobs:
             } catch (error) {
               message += `❌ Error during validation: ${error.message}`;
             }
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

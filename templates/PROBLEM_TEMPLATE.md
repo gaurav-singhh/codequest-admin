@@ -28,6 +28,7 @@ problem-submissions/your-problem-name/
 ## Description
 
 Write a clear and detailed description of the problem. Include:
+
 - What the problem is asking for
 - Any background context needed
 - Clear explanation of the task
@@ -35,6 +36,7 @@ Write a clear and detailed description of the problem. Include:
 ## Input Format
 
 Describe the input format clearly:
+
 - First line contains...
 - Second line contains...
 - etc.
@@ -42,20 +44,26 @@ Describe the input format clearly:
 ## Output Format
 
 Describe the expected output format:
+
 - Print the result as...
 - Output should be...
 
 ## Examples
 
 ### Example 1
+
 **Input:**
 ```
+
 [sample input]
+
 ```
 
 **Output:**
 ```
+
 [sample output]
+
 ```
 
 **Explanation:**
@@ -85,20 +93,25 @@ Problem Name: "Your Problem Name"
 Function Name: yourFunctionName
 
 ## Input Structure:
+
 Input Field: int n
 Input Field: list<int> arr
 
 ## Output Structure:
+
 Output Field: int result
 
 ## Constraints:
+
 - 1 ≤ n ≤ 10^5
 - 1 ≤ arr[i] ≤ 10^9
 
-## Time Limit: 
+## Time Limit:
+
 2 seconds
 
-## Memory Limit: 
+## Memory Limit:
+
 256 MB
 ```
 
@@ -107,12 +120,14 @@ Output Field: int result
 When defining Input/Output Fields in Structure.md, use these types:
 
 ### Primitive Types:
+
 - `int` - Integer numbers
 - `float` - Decimal numbers
 - `string` - Text strings
 - `bool` - Boolean (true/false)
 
 ### List Types:
+
 - `list<int>` - List of integers
 - `list<float>` - List of decimal numbers
 - `list<string>` - List of strings
@@ -121,17 +136,20 @@ When defining Input/Output Fields in Structure.md, use these types:
 ## Test Cases Guidelines
 
 ### Test File Naming:
+
 - `input1.txt`, `output1.txt` - First test case
 - `input2.txt`, `output2.txt` - Second test case
 - Continue numbering: `input3.txt`, `output3.txt`, etc.
 
 ### Test Case Quality:
+
 1. **Edge Cases**: Include minimum/maximum constraint values
 2. **Corner Cases**: Empty inputs, single elements, etc.
 3. **Typical Cases**: Normal expected inputs
 4. **Stress Tests**: Large inputs within constraints
 
 ### Test File Format:
+
 - Each input file should contain exactly what the problem description specifies
 - Output files should contain only the expected result
 - No extra whitespace or formatting
@@ -139,6 +157,7 @@ When defining Input/Output Fields in Structure.md, use these types:
 ## Example Problem Submission
 
 See the existing problems in the main repository for examples:
+
 - `two-sum/` - Simple array problem
 - `max-element/` - Array processing
 - `classroom/` - String manipulation
@@ -178,6 +197,7 @@ Before submitting, ensure:
 ## Getting Help
 
 If you need help with your submission:
+
 1. Check existing problems for examples
 2. Open an issue in the admin repository
 3. Join our Discord community (link in main repository)

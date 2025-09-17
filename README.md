@@ -9,10 +9,12 @@ The Problem Management System automates the process of accepting, validating, an
 ## Architecture
 
 ### Two-Repository System
+
 - **codequest-admin** (this repo): Handles problem submissions and processing
 - **codequest-web**: Main web application that consumes processed problems
 
 ### Workflow
+
 1. Community submits problems via PR to this repository
 2. GitHub Actions automatically validate problem format
 3. Approved problems are processed and synced to web repository
@@ -32,6 +34,7 @@ codequest-admin/
 ## Problem Submission Process
 
 ### For Contributors
+
 1. Fork this repository
 2. Create problem following template in `templates/`
 3. Submit PR with problem in `problem-submissions/`
@@ -40,7 +43,9 @@ codequest-admin/
 6. Automatic sync to web application
 
 ### Problem Format
+
 Each problem must include:
+
 - `Problem.md` - Problem statement
 - `Structure.md` - Metadata and constraints
 - `tests/` - Input/output test cases

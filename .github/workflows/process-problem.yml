@@ -4,52 +4,52 @@ on:
   workflow_dispatch:
     inputs:
       problem_path:
-        description: 'Path to the problem directory (e.g., problem-submissions/my-problem)'
+        description: "Path to the problem directory (e.g., problem-submissions/my-problem)"
         required: true
         type: string
-      
+
 jobs:
   process:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout admin repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.ADMIN_TOKEN }}
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'npm'
-          
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm install
-        
+
       - name: Validate problem one more time
         run: |
           echo "🔍 Final validation of ${{ github.event.inputs.problem_path }}"
           node scripts/validate-problem.js "${{ github.event.inputs.problem_path }}"
-          
+
       - name: Generate boilerplate code
         run: |
           echo "🛠️ Generating boilerplate for ${{ github.event.inputs.problem_path }}"
           node tools/boilerplate-generator/index.js "${{ github.event.inputs.problem_path }}"
-          
+
       - name: Prepare problem for web repository
         run: |
           echo "📦 Preparing problem for web repository..."
-          
+
           PROBLEM_PATH="${{ github.event.inputs.problem_path }}"
           PROBLEM_NAME=$(basename "$PROBLEM_PATH")
-          
+
           # Create processed directory if it doesn't exist
           mkdir -p processed-problems
-          
+
           # Copy problem to processed directory with clean structure
           cp -r "$PROBLEM_PATH" "processed-problems/$PROBLEM_NAME"
-          
+
           # Create metadata file
           cat > "processed-problems/$PROBLEM_NAME/metadata.json" << EOF
           {
@@ -59,27 +59,27 @@ jobs:
             "version": "1.0.0"
           }
           EOF
-          
+
           echo "✅ Problem prepared: $PROBLEM_NAME"
-          
+
       - name: Commit processed problem
         run: |
           PROBLEM_NAME=$(basename "${{ github.event.inputs.problem_path }}")
-          
+
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
+
           git add processed-problems/
           git commit -m "Process problem: $PROBLEM_NAME" || exit 0
           git push
-          
+
       - name: Trigger sync to web repository
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.WEB_REPO_TOKEN }}
           script: |
             const problemName = '${{ github.event.inputs.problem_path }}'.split('/').pop();
-            
+
             // Trigger workflow in web repository
             await github.rest.actions.createWorkflowDispatch({
               owner: 'gaurav-singhh', // Replace with actual username
@@ -92,5 +92,5 @@ jobs:
                 source_owner: context.repo.owner
               }
             });
-            
+
             console.log(`Triggered sync for problem: ${problemName}`);
