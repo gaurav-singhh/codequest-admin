@@ -1,14 +1,15 @@
-# Problem Structure
-
 Problem Name: "GCD of Two Numbers"
 Function Name: gcd
-Input Structure: - a: integer - b: integer
-Output Structure: - result: integer
+Input Structure:
+Input Field: int a
+Input Field: int b
+Output Structure:
+Output Field: int result
 Input Fields:
-	a: First integer
-	b: Second integer
+  a: First integer
+  b: Second integer
 Output Fields:
-	result: Greatest common divisor of a and b
+  result: Greatest common divisor of a and b
 Constraints: 1 ≤ a, b ≤ 10^9
 Time Limit: 1 second
 Memory Limit: 256 MB
