@@ -2,8 +2,11 @@
 
 Problem Name: "GCD of Two Numbers"
 Function Name: gcd
-Input Structure: - a: integer - b: integer
-Output Structure: - result: integer
+Input Structure:
+	- a: integer
+	- b: integer
+Output Structure:
+	- result: integer
 Input Fields:
 a: First integer
 b: Second integer
