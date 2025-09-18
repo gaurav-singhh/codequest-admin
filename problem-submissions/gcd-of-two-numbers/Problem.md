@@ -1,6 +1,6 @@
 # Find GCD of Two Numbers
 
-Given two integers, find their greatest common divisor (GCD).
+Given two integers, find their greatest common divisor (GCD.)
 
 ## Input
 
