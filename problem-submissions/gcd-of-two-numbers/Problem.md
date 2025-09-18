@@ -2,7 +2,7 @@
 
 ## Problem Description
 
-Given two integers, find their greatest common divisor (GCD). The GCD of two numbers is the largest integer that divides both numbers without leaving a remainder...
+Given two integers, find their greatest common divisor (GCD). The GCD of two numbers is the largest integer that divides both numbers without leaving a remainder.
 
 ## Input
 
