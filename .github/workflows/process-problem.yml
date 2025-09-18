@@ -1,4 +1,3 @@
-
 name: Process Approved Problem
 
 on:
@@ -19,7 +18,6 @@ on:
 jobs:
   process:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout admin repository
         uses: actions/checkout@v4
@@ -35,70 +33,56 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Validate problem one more time
+      - name: Get changed problem directories
+        id: changed_dirs
         run: |
-          echo "🔍 Final validation of ${{ github.event.inputs.problem_path }}"
-          node scripts/validate-problem.js "${{ github.event.inputs.problem_path }}"
+          CHANGED_DIRS=$(git diff --name-only HEAD~1 HEAD | grep "^problem-submissions/" | cut -d'/' -f1-2 | sort -u)
+          echo "dirs=$CHANGED_DIRS" >> $GITHUB_ENV
 
-      - name: Generate boilerplate code
+      - name: Process each problem
         run: |
-          echo "🛠️ Generating boilerplate for ${{ github.event.inputs.problem_path }}"
-          node tools/boilerplate-generator/index.js "${{ github.event.inputs.problem_path }}"
-
-      - name: Prepare problem for web repository
-        run: |
-          echo "📦 Preparing problem for web repository..."
-
-          PROBLEM_PATH="${{ github.event.inputs.problem_path }}"
-          PROBLEM_NAME=$(basename "$PROBLEM_PATH")
-
-          # Create processed directory if it doesn't exist
-          mkdir -p processed-problems
-
-          # Copy problem to processed directory with clean structure
-          cp -r "$PROBLEM_PATH" "processed-problems/$PROBLEM_NAME"
-
-          # Create metadata file
-          cat > "processed-problems/$PROBLEM_NAME/metadata.json" << EOF
-          {
-            "id": "$PROBLEM_NAME",
-            "processedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "status": "approved",
-            "version": "1.0.0"
-          }
-          EOF
-
-          echo "✅ Problem prepared: $PROBLEM_NAME"
-
-      - name: Commit processed problem
-        run: |
-          PROBLEM_NAME=$(basename "${{ github.event.inputs.problem_path }}")
-
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          git add processed-problems/
-          git commit -m "Process problem: $PROBLEM_NAME" || exit 0
-          git push
+          for dir in ${{ env.dirs }}; do
+            echo "🔍 Final validation of $dir"
+            node scripts/validate-problem.js "$dir"
+            echo "🛠️ Generating boilerplate for $dir"
+            node tools/boilerplate-generator/index.js "$dir"
+            echo "📦 Preparing problem for web repository..."
+            PROBLEM_NAME=$(basename "$dir")
+            mkdir -p processed-problems
+            cp -r "$dir" "processed-problems/$PROBLEM_NAME"
+            printf '%s\n' \
+              "{" \
+              "  \"id\": \"$PROBLEM_NAME\"," \
+              "  \"processedAt\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"," \
+              "  \"status\": \"approved\"," \
+              "  \"version\": \"1.0.0\"" \
+              "}" > "processed-problems/$PROBLEM_NAME/metadata.json"
+            echo "✅ Problem prepared: $PROBLEM_NAME"
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add processed-problems/
+            git commit -m "Process problem: $PROBLEM_NAME" || exit 0
+            git push
+          done
 
       - name: Trigger sync to web repository
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.WEB_REPO_TOKEN }}
           script: |
-            const problemName = '${{ github.event.inputs.problem_path }}'.split('/').pop();
-
-            // Trigger workflow in web repository
-            await github.rest.actions.createWorkflowDispatch({
-              owner: 'gaurav-singhh', // Replace with actual username
-              repo: 'codequest-web',   // Replace with actual web repo name
-              workflow_id: 'sync-problems.yml',
-              ref: 'main',
-              inputs: {
-                problem_name: problemName,
-                source_repo: context.repo.repo,
-                source_owner: context.repo.owner
-              }
-            });
-
-            console.log(`Triggered sync for problem: ${problemName}`);
+            const changedDirs = process.env.dirs ? process.env.dirs.split(' ') : [];
+            for (const dir of changedDirs) {
+              const problemName = dir.split('/').pop();
+              await github.rest.actions.createWorkflowDispatch({
+                owner: 'gaurav-singhh',
+                repo: 'codequest-web',
+                workflow_id: 'sync-problems.yml',
+                ref: 'main',
+                inputs: {
+                  problem_name: problemName,
+                  source_repo: context.repo.repo,
+                  source_owner: context.repo.owner
+                }
+              });
+              console.log(`Triggered sync for problem: ${problemName}`);
+            }
