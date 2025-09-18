@@ -63,7 +63,7 @@ jobs:
             echo "✅ Problem prepared: $PROBLEM_NAME"
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
-            git add processed-problems/
+            git add -f processed-problems/
             git commit -m "Process problem: $PROBLEM_NAME" || exit 0
             git push
           done
