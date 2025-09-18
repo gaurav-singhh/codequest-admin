@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * Validate a problem submission
+ * Validate a problem submissions.
  * @param {string} problemPath - Path to the problem directory
  */
 function validateProblem(problemPath) {
