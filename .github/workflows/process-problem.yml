@@ -53,6 +53,20 @@ jobs:
             PROBLEM_NAME=$(basename "$dir")
             mkdir -p processed-problems
             cp -r "$dir" "processed-problems/$PROBLEM_NAME"
+
+            # --- BEGIN: Normalize testcases structure ---
+            if [ -d "processed-problems/$PROBLEM_NAME/tests" ]; then
+              mkdir -p "processed-problems/$PROBLEM_NAME/tests/inputs"
+              mkdir -p "processed-problems/$PROBLEM_NAME/tests/outputs"
+              i=0
+              while [ -f "processed-problems/$PROBLEM_NAME/tests/input$((i+1)).txt" ] && [ -f "processed-problems/$PROBLEM_NAME/tests/output$((i+1)).txt" ]; do
+                mv "processed-problems/$PROBLEM_NAME/tests/input$((i+1)).txt" "processed-problems/$PROBLEM_NAME/tests/inputs/$i.txt"
+                mv "processed-problems/$PROBLEM_NAME/tests/output$((i+1)).txt" "processed-problems/$PROBLEM_NAME/tests/outputs/$i.txt"
+                i=$((i+1))
+              done
+            fi
+            # --- END: Normalize testcases structure ---
+
             printf '%s\n' \
               "{" \
               "  \"id\": \"$PROBLEM_NAME\"," \
